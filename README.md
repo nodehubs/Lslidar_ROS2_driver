@@ -124,6 +124,4 @@ ros2 run rviz2 rviz2
 | compensation  | bool | M10系列是否使用角度补偿功能.<br/>默认值:`false` |
 | pubScan  | bool | 是否发布scan话题.<br/>默认值:`true` |
 | scan_topic     | string | 设置激光数据topic名称: `/scan` |
-| pubPointCloud2  | bool | 是否发布pointcloud2话题. <br/>默认值: `false` |
-| pointcloud_topic     | string | 设置激光数据topic名称: `/lslidar_point_cloud` |
 

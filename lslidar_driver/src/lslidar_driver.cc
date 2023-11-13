@@ -40,7 +40,11 @@ namespace lslidar_driver
 		abort();
 	}
 	LslidarDriver::LslidarDriver() : LslidarDriver(rclcpp::NodeOptions()) {}
+#ifdef with_diagnostic_updater
 	LslidarDriver::LslidarDriver(const rclcpp::NodeOptions &options) : Node("lslidar_driver_node", options), diagnostics(this)
+#else
+    LslidarDriver::LslidarDriver(const rclcpp::NodeOptions &options) : Node("lslidar_driver_node", options)
+#endif
 	{
 		signal(SIGINT, my_hander);
 
@@ -62,28 +66,36 @@ namespace lslidar_driver
 		frame_id = std::string("laser_link");
 		scan_topic = std::string("/scan");
 		lidar_name = std::string("M10");
+#ifdef WITH_PCL
 		pointcloud_topic = std::string("/lslidar_point_cloud");
+#endif
 		is_start = true;
 		min_range = 0.3;
 		max_range = 100.0;
 		use_gps_ts = true;
 		compensation = true;
 		pubScan = true;
+#ifdef WITH_PCL
 		pubPointCloud2 = true;
+#endif
 		angle_disable_min = 0.0;
 		angle_disable_max = 0.0;
 
 		this->declare_parameter<std::string>("lidar_name", "M10");
 		this->declare_parameter<std::string>("frame_id", "laser_link");
 		this->declare_parameter<std::string>("scan_topic", "/scan");
+#ifdef WITH_PCL
 		this->declare_parameter<std::string>("pointcloud_topic", "/lslidar_point_cloud");
+#endif
 		this->declare_parameter<double>("min_range", 0.3);
 		this->declare_parameter<double>("max_range", 100.0);
 		this->declare_parameter<bool>("use_gps_ts", false);
 		this->declare_parameter<bool>("high_reflection", false);
 		this->declare_parameter<bool>("compensation", false);
 		this->declare_parameter<bool>("pubScan", false);
+#ifdef WITH_PCL
 		this->declare_parameter<bool>("pubPointCloud2", false);
+#endif
 		this->declare_parameter<double>("angle_disable_min", 0.0);
 		this->declare_parameter<double>("angle_disable_max", 0.0);
 		this->declare_parameter<std::string>("interface_selection", "net");
@@ -96,9 +108,13 @@ namespace lslidar_driver
 		this->get_parameter("max_range", max_range);
 		this->get_parameter("use_gps_ts", use_gps_ts);
 		this->get_parameter("compensation", compensation);
+#ifdef WITH_PCL
 		this->get_parameter("pointcloud_topic", pointcloud_topic);
+#endif
 		this->get_parameter("pubScan", pubScan);
+#ifdef WITH_PCL
 		this->get_parameter("pubPointCloud2", pubPointCloud2);
+#endif
 		this->get_parameter("angle_disable_min", angle_disable_min);
 		this->get_parameter("angle_disable_max", angle_disable_max);
 		this->get_parameter("interface_selection", interface_selection);
@@ -228,8 +244,10 @@ namespace lslidar_driver
 
 		if (pubScan)
 			scan_pub = this->create_publisher<sensor_msgs::msg::LaserScan>(scan_topic, 10);
+#ifdef WITH_PCL
 		if (pubPointCloud2)
 			point_cloud_pub = this->create_publisher<sensor_msgs::msg::PointCloud2>(pointcloud_topic, 10);
+#endif
 		difop_switch = this->create_subscription<std_msgs::msg::Int8>("lslidar_order", 1, std::bind(&LslidarDriver::lidar_order, this, std::placeholders::_1)); // 转速输入
 		return true;
 	}
@@ -410,7 +428,9 @@ namespace lslidar_driver
 
 	void LslidarDriver::open_serial()
 	{
+#ifdef with_diagnostic_updater
 		diagnostics.setHardwareID("Lslidar");
+#endif
 		int code = 0;
 		serial_port_ = std::string("/dev/ttyUSB0");
 		this->declare_parameter<std::string>("serial_port_", "/dev/ttyUSB0");
@@ -435,6 +455,7 @@ namespace lslidar_driver
 		dump_file = std::string("");
 		this->declare_parameter<std::string>("pcap", "");
 		this->get_parameter("pcap", dump_file);
+#ifdef with_diagnostic_updater
 		// ROS diagnostics
 		diagnostics.setHardwareID("Lslidar");
 
@@ -448,7 +469,7 @@ namespace lslidar_driver
 			"lslidar_packets", diagnostics,
 			FrequencyStatusParam(&diag_min_freq, &diag_max_freq, 0.1, 10),
 			TimeStampStatusParam()));
-
+#endif
 		int hz = 10;
 		if (lidar_name == "M10_P")
 			hz = 12;
@@ -969,7 +990,7 @@ namespace lslidar_driver
 			{
 				if (pubScan)
 				{
-					auto scan = sensor_msgs::msg::::UniquePtr(new sensor_msgs::msg::LaserScan());
+					auto scan = sensor_msgs::msg::LaserScan::UniquePtr(new sensor_msgs::msg::LaserScan());
 					int scan_num = count_num * 2;
 					std::vector<ScanPoint> points;
 					rclcpp::Time start_time;
@@ -1031,6 +1052,7 @@ namespace lslidar_driver
 					}
 					scan_pub->publish(std::move(scan));
 				}
+#ifdef WITH_PCL
 				if (pubPointCloud2)
 				{
 					std::vector<ScanPoint> points;
@@ -1101,6 +1123,7 @@ namespace lslidar_driver
 					pcl::toROSMsg(*point_cloud, pc_msg);
 					point_cloud_pub->publish(pc_msg);
 				}
+#endif
 			}
 			else
 			{
@@ -1167,6 +1190,7 @@ namespace lslidar_driver
 					}
 					scan_pub->publish(std::move(scan));
 				}
+#ifdef WITH_PCL
 				if (pubPointCloud2)
 				{
 					std::vector<ScanPoint> points;
@@ -1218,6 +1242,7 @@ namespace lslidar_driver
 					pcl::toROSMsg(*point_cloud, pc_msg);
 					point_cloud_pub->publish(pc_msg);
 				}
+#endif
 			}
 			count_num = 0;
 			wait_for_wake = true;

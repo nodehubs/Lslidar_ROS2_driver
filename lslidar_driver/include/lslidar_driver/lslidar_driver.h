@@ -28,14 +28,18 @@
 #include <boost/thread.hpp>
 #include "rclcpp/rclcpp.hpp"
 #include <thread>
+#ifdef with_diagnostic_updater
 #include "diagnostic_updater/diagnostic_updater.hpp"
 #include "diagnostic_updater/publisher.hpp"
+#endif
 #include "lslidar_msgs/msg/lslidar_packet.hpp"
 #include "std_msgs/msg/byte.hpp"
 
 #include "sensor_msgs/msg/point_cloud2.hpp"
+#ifdef WITH_PCL
 #include "pcl_conversions/pcl_conversions.h"
 #include "pcl/point_types.h"
+#endif
 
 #include "time.h"
 #include "input.h"
@@ -43,12 +47,14 @@
 #include "sensor_msgs/msg/laser_scan.hpp"
 namespace lslidar_driver {
 
+#ifdef WITH_PCL
 struct PointXYZIT {
     PCL_ADD_POINT4D;
     uint8_t intensity;
     double timestamp;
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW  // make sure our new allocators are aligned
 } EIGEN_ALIGN16;
+#endif
  
 typedef struct {
     double degree;
@@ -108,8 +114,9 @@ private:
     bool compensation;
     bool first_compensation = true;
     bool pubScan;
+#ifdef WITH_PCL
     bool pubPointCloud2;
-
+#endif
     double min_range;
     double max_range;
     double angle_disable_min;
@@ -138,22 +145,30 @@ private:
     rclcpp::Time time_;
     std::vector<ScanPoint> scan_points_;
     std::vector<ScanPoint> scan_points_bak_;
+#ifdef with_diagnostic_updater
     // Diagnostics updater
     diagnostic_updater::Updater diagnostics;
     std::shared_ptr<diagnostic_updater::TopicDiagnostic> diag_topic;
     double diag_min_freq;
     double diag_max_freq;
+#endif
     rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr scan_pub;
+#ifdef WITH_PCL
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr point_cloud_pub;
+#endif
 	rclcpp::Subscription<std_msgs::msg::Int8>::SharedPtr difop_switch;
     LSIOSR * serial_;
 };
+#ifdef WITH_PCL
 typedef PointXYZIT VPoint;
 typedef pcl::PointCloud<VPoint> VPointCloud;
+#endif
 
 } // namespace lslidar_driver
+#ifdef WITH_PCL
 POINT_CLOUD_REGISTER_POINT_STRUCT(lslidar_driver::PointXYZIT,
                                   (float, x, x)(float, y, y)(float, z, z)(
                                           std::uint8_t, intensity,
                                           intensity)(double, timestamp, timestamp))
+#endif
 #endif // _LSLIDAR_DRIVER_H_
