@@ -29,7 +29,7 @@ LSLIDAR ROS2驱动，以ROS2标准消息格式发送激光雷达数据。
 sudo apt update
 sudo apt install -y tros-lslidar-driver
 ```
-**注意：如果安装s时LSLIDAR已连接在RDK X3上，则安装完后需要重新拔插一次**
+**注意：如果安装时LSLIDAR已连接在RDK X3上，则安装完后需要重新拔插一次**
 
 ## 运行LSLIDAR
 
