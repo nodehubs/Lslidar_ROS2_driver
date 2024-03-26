@@ -101,9 +101,9 @@ Set the Fixed Frame to base_link or laser_link to view the collected data from t
 ## Topics
 
 ### Published Topics
-| Topic                | Type                    | Description                                      ||----------------------|-------------------------|--------------------------------------------------|
-| `scan`               | sensor_msgs/LaserScan   | Two-dimensional laser radar scanning data         |
-
+| Topic                | Type                    | Description                                      |
+|----------------------|-------------------------|--------------------------------------------------|
+| `scan`               | sensor_msgs/LaserScan   | Two-dimensional laser radar scanning data                |
 
 ## Parameters
 | Parameter name | Data Type | detail                                    |
