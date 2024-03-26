@@ -50,7 +50,8 @@ Open a new terminal and enter the following command to view LiDAR output data:
 ```bash
 source /opt/tros/setup.bash
 ros2 topic echo /scan
-```### Method 2: Visualization using Foxglove
+```
+### Method 2: Visualization using Foxglove
 
 ***Note: The device running Foxglove Studio should be on the same network segment as the RDK device***
 
